@@ -37,6 +37,7 @@ app = FastAPI(
 origins = [
     "http://localhost:3000",
     "https://integrity-frontend-lime.vercel.app",
+    "https://risco-frontend.vercel.app"
     "https://integrity-staging.genovasolutions.com",
     "https://integrity.genovasolutions.com",
 ]
