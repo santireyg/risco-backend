@@ -294,8 +294,66 @@ async def update_docfile(
         object_id = ObjectId(docfile_id)
         tenant_id = current_user.tenant_id
         
-        docfile_obj = DocFile(**updated_data)
-        update_dict = docfile_obj.model_dump(exclude_unset=True)
+        # Preparar los datos para actualización
+        # Remover campos que no deben ser actualizados o que son generados
+        fields_to_remove = ["id", "_id", "upload_date", "uploaded_by", "tenant_id", "pages"]
+        update_dict = {k: v for k, v in updated_data.items() if k not in fields_to_remove}
+        
+        # Convertir strings de fecha a datetime si es necesario
+        from datetime import datetime
+        for date_field in ["balance_date", "balance_date_previous"]:
+            if date_field in update_dict and isinstance(update_dict[date_field], str):
+                try:
+                    update_dict[date_field] = datetime.fromisoformat(update_dict[date_field].replace('Z', '+00:00'))
+                except Exception:
+                    # Si falla la conversión, mantener el valor original
+                    pass
+        
+        # Sincronizar fechas con balance_data e income_statement_data para exportación
+        # Esto asegura que las fechas editadas se reflejen en todas las estructuras internas
+        if "balance_date" in update_dict or "balance_date_previous" in update_dict:
+            # Obtener documento actual para sincronizar
+            current_doc = await docs_collection.find_one(
+                {"_id": object_id, "tenant_id": tenant_id},
+                {"balance_data": 1, "income_statement_data": 1}
+            )
+            
+            if current_doc:
+                # Sincronizar balance_date (periodo_actual)
+                if "balance_date" in update_dict:
+                    # Actualizar en balance_data
+                    if current_doc.get("balance_data"):
+                        if "balance_data" not in update_dict:
+                            update_dict["balance_data"] = current_doc["balance_data"]
+                        if "informacion_general" not in update_dict["balance_data"]:
+                            update_dict["balance_data"]["informacion_general"] = update_dict["balance_data"].get("informacion_general", {})
+                        update_dict["balance_data"]["informacion_general"]["periodo_actual"] = update_dict["balance_date"]
+                    
+                    # Actualizar en income_statement_data
+                    if current_doc.get("income_statement_data"):
+                        if "income_statement_data" not in update_dict:
+                            update_dict["income_statement_data"] = current_doc["income_statement_data"]
+                        if "informacion_general" not in update_dict["income_statement_data"]:
+                            update_dict["income_statement_data"]["informacion_general"] = update_dict["income_statement_data"].get("informacion_general", {})
+                        update_dict["income_statement_data"]["informacion_general"]["periodo_actual"] = update_dict["balance_date"]
+                
+                # Sincronizar balance_date_previous (periodo_anterior)
+                if "balance_date_previous" in update_dict:
+                    # Actualizar en balance_data
+                    if current_doc.get("balance_data"):
+                        if "balance_data" not in update_dict:
+                            update_dict["balance_data"] = current_doc["balance_data"]
+                        if "informacion_general" not in update_dict["balance_data"]:
+                            update_dict["balance_data"]["informacion_general"] = update_dict["balance_data"].get("informacion_general", {})
+                        update_dict["balance_data"]["informacion_general"]["periodo_anterior"] = update_dict["balance_date_previous"]
+                    
+                    # Actualizar en income_statement_data
+                    if current_doc.get("income_statement_data"):
+                        if "income_statement_data" not in update_dict:
+                            update_dict["income_statement_data"] = current_doc["income_statement_data"]
+                        if "informacion_general" not in update_dict["income_statement_data"]:
+                            update_dict["income_statement_data"]["informacion_general"] = update_dict["income_statement_data"].get("informacion_general", {})
+                        update_dict["income_statement_data"]["informacion_general"]["periodo_anterior"] = update_dict["balance_date_previous"]
         
         # Solo permitir actualizar documentos del propio tenant
         result = await docs_collection.update_one(
@@ -311,13 +369,21 @@ async def update_docfile(
         })
         if updated_document:
             updated_document["id"] = str(updated_document.pop("_id"))
+        
+        # Ejecutar validación después de actualizar
         await validate({
             "docfile_id": docfile_id,
-            "collection": docs_collection,
-            "current_user": current_user.model_dump() if hasattr(current_user, 'model_dump') else dict(current_user)
+            "requester": current_user,
+            "operation": "validate"
         })
+        
         return updated_document
+    except HTTPException:
+        raise
     except Exception as e:
+        import traceback
+        error_detail = f"Error al actualizar el documento: {str(e)}\n{traceback.format_exc()}"
+        print(error_detail)  # Para debugging en logs del servidor
         if "Invalid ObjectId" in str(e):
             raise HTTPException(status_code=400, detail="ID de documento inválido")
         raise HTTPException(status_code=500, detail=f"Error al actualizar el documento: {str(e)}")
