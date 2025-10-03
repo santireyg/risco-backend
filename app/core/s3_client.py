@@ -1,8 +1,31 @@
 # app/core/s3_client.py
 
 import boto3
+from botocore.config import Config
 from urllib.parse import urlparse
 from app.core.config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, S3_BUCKET_NAME
+
+# Configuración del pool de conexiones para evitar warnings de pool lleno
+boto_config = Config(
+    # Configuración del pool de conexiones
+    max_pool_connections=50,  # Aumentar el tamaño del pool (default es 10)
+    
+    # Configuración de S3
+    s3={
+        'addressing_style': 'virtual'
+    },
+    signature_version='s3v4',
+    
+    # Configuración de reintentos
+    retries={
+        'max_attempts': 3,
+        'mode': 'adaptive'  # Se adapta automáticamente a las condiciones de la red
+    },
+    
+    # Timeouts para evitar conexiones colgadas
+    connect_timeout=5,
+    read_timeout=30
+)
 
 # Crea el cliente de S3 con configuración específica para evitar redirects
 s3_client = boto3.client(
@@ -10,12 +33,7 @@ s3_client = boto3.client(
     aws_access_key_id=AWS_ACCESS_KEY_ID,
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     region_name=AWS_DEFAULT_REGION,
-    config=boto3.session.Config(
-        s3={
-            'addressing_style': 'virtual'
-        },
-        signature_version='s3v4'
-    )
+    config=boto_config
 )
 
 def generate_presigned_url(key: str, expiration: int = 3600) -> str:
