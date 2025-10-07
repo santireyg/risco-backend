@@ -221,6 +221,12 @@ async def update_doc_pages(state: DocumentProcessingState) -> DocumentProcessing
     requester = state["requester"]
     user_id = str(requester.id)
 
+    # Aplicar lógica: Si is_appendix=True, entonces is_balance_sheet y is_income_statement_sheet deben ser False
+    for page in pages:
+        if page.recognized_info.is_appendix:
+            page.recognized_info.is_balance_sheet = False
+            page.recognized_info.is_income_statement_sheet = False
+
     # Update Status: Reconocido
     await update_status(collection, docfile_id, "Reconocido", user_id, progress=100, update_db=False)    
     await collection.update_one(
