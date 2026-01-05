@@ -20,7 +20,7 @@ from app.utils.prompts import prompt_extract_company_info
 collection = docs_collection
 
 # Defino el modelo a utilizar, con el tipo de dato esperado
-model_text = "gemini-flash-latest"
+model_text = "gemini-3-flash-preview"
 model = ChatGoogleGenerativeAI(model=model_text, max_tokens=15000, max_retries=1).with_structured_output(CompanyInfo)
 
 

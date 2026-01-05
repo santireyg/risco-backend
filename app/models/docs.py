@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone, date
 from bson import ObjectId
 
 from app.models.docs_recognition import RecognizedInfo
-from app.models.docs_report import AIReport
+# from app.models.docs_report import AIReport
 from app.models.docs_validation import Validation
 from app.models.docs_company_info import CompanyInfo
 from app.models.docs_processing_time import ProcessingTime
@@ -38,7 +38,7 @@ class DocFile(BaseModel):
     income_statement_data: Optional[Dict[str, Any]] = None  # Estructura dinámica por tenant
     balance_data: Optional[Dict[str, Any]] = None  # Estructura dinámica por tenant
     validation: Optional["Validation"] = Field(default_factory=Validation)
-    ai_report: Optional["AIReport"] = None
+    # ai_report: Optional["AIReport"] = None
     company_info: Optional["CompanyInfo"] = None
     processing_time: Optional["ProcessingTime"] = Field(default=None, description="Tiempos de procesamiento por etapa")
     export_data: Optional["ExportData"] = None

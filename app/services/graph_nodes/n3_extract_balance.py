@@ -70,7 +70,7 @@ async def extract_balance_llm(state: DocumentProcessingState) -> DocumentProcess
     BalanceData = create_balance_data_model(BalanceMainResults)
     
     # Crear modelo LLM con structured output simplificado (sin campo 'concepto')
-    model_text = "gemini-flash-latest"
+    model_text = "gemini-3-flash-preview"
     model = ChatGoogleGenerativeAI(
         model=model_text,
         max_tokens=None,

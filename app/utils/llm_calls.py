@@ -6,7 +6,7 @@ import io
 import os
 from typing import List
 from app.models.docs_recognition import RecognizedInfo
-from app.models.docs_report import AIReport
+# from app.models.docs_report import AIReport
 from app.utils.llm_clients import get_openai_client, get_anthropic_client
 
 def get_base64_encoded_image(image_path: str) -> str:
@@ -113,23 +113,3 @@ def anthropic_images(
     )
     return message.content[0].text
 
-def openai_text(indications: str, data: str, model: str = "gpt-4o-mini") -> dict:
-    """
-    Envía texto e indicaciones al modelo de OpenAI y retorna el resultado formateado según AIReport.
-    """
-    client = get_openai_client()
-    response = client.beta.chat.completions.parse(
-        model=model,
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": indications},
-                    {"type": "text", "text": f"DATOS:\n{data}"},
-                ]
-            }
-        ],
-        response_format=AIReport,
-        max_tokens=4000,
-    )
-    return response.choices[0].message.parsed
