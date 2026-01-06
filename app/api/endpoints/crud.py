@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 import unicodedata
 import re
 
-from app.core.database import docs_collection
+from app.core.database import docs_collection, reports_collection
 from app.models.users import User
 from app.core.auth import get_current_user
 from app.core.s3_client import get_presigned_url_from_image_path, s3_client, S3_BUCKET_NAME
@@ -455,3 +455,47 @@ async def delete_document(
         "s3_deleted": len(s3_keys) - len(delete_errors),
         "s3_errors": delete_errors,
     }
+
+
+# -------------------------------------------------------------------------------------
+# /report/{report_id}: ENDPOINT PARA OBTENER UN REPORTE POR SU ID
+# -------------------------------------------------------------------------------------
+@router.get("/report/{report_id}")
+@limiter.limit("30/minute")
+async def get_report(
+    report_id: str,
+    current_user: User = Depends(get_current_user),
+    request: Request = None
+):
+    """
+    Obtiene un reporte financiero por su ID.
+    
+    Valida que:
+    - El ID sea válido
+    - El reporte exista
+    - El usuario tenga acceso (mismo tenant)
+    """
+    try:
+        object_id = ObjectId(report_id)
+        tenant_id = current_user.tenant_id
+        
+        # Buscar el reporte verificando que pertenece al tenant del usuario
+        report = await reports_collection.find_one({
+            "_id": object_id,
+            "tenant_id": tenant_id
+        })
+        
+        if not report:
+            raise HTTPException(status_code=404, detail="Reporte no encontrado")
+        
+        # Convertir ObjectId a string para la respuesta
+        report["id"] = str(report.pop("_id"))
+        
+        return report
+    except HTTPException:
+        # Re-lanzar excepciones HTTP ya manejadas
+        raise
+    except Exception as e:
+        if "Invalid ObjectId" in str(e):
+            raise HTTPException(status_code=400, detail="ID de reporte inválido")
+        raise HTTPException(status_code=500, detail=f"Error al obtener el reporte: {str(e)}")
