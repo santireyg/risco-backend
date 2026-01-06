@@ -130,6 +130,25 @@ class BCRAData(BaseModel):
 
 
 # ------------------------------------------------------------------------------------
+# MODELOS DEL ANÁLISIS DE IA
+# ------------------------------------------------------------------------------------
+from typing import Annotated, List
+from pydantic import BaseModel, Field
+
+class KeyInsights(BaseModel):
+    """Insights clave generados por IA."""
+    strengths: List[str] = Field(default_factory=list, description="Lista de puntos fuertes (formato Markdown)")
+    watchouts: List[str] = Field(default_factory=list, description="Lista de alertas (formato Markdown)")
+    red_flags: List[str] = Field(default_factory=list, description="Lista de alarmas (formato Markdown)")
+
+class AIReport(BaseModel):
+    """Reporte generado por IA del Análisis de riesgo."""
+    reasoned_analysis: str = Field(..., description="Análisis razonado en formato Markdown")
+    executive_summary: str = Field(..., description="Resumen ejecutivo en formato Markdown")
+    key_insights: KeyInsights
+
+
+# ------------------------------------------------------------------------------------
 # MODELO PRINCIPAL DE REPORTE
 # ------------------------------------------------------------------------------------
 class Report(BaseModel):
@@ -145,6 +164,7 @@ class Report(BaseModel):
     statement_data: Optional[StatementData] = None
     indicators: Optional[List[IndicatorResult]] = None
     bcra_data: Optional[BCRAData] = None
+    ai_report: Optional[AIReport] = None
     error_message: Optional[str] = None
 
     class Config:

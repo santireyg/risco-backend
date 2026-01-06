@@ -18,6 +18,7 @@ from app.services.report_graph.nodes.n0_start_end import start_node, end_node, e
 from app.services.report_graph.nodes.n1_create_report_object import create_report_object_node
 from app.services.report_graph.nodes.n2_calculate_indicators import calculate_indicators_node
 from app.services.report_graph.nodes.n3_get_bcra_data import get_bcra_data_node
+from app.services.report_graph.nodes.n4_generate_ai_report import generate_ai_report_node
 from app.models.users import UserPublic
 
 logger = logging.getLogger(__name__)
@@ -54,6 +55,13 @@ def route_after_bcra(state: ReportProcessingState) -> str:
     """Enrutamiento después de obtener datos BCRA."""
     if state.get("error_message"):
         return "error_node"
+    return "generate_ai_report_node"
+
+
+def route_after_ai_report(state: ReportProcessingState) -> str:
+    """Enrutamiento después de generar reporte IA."""
+    if state.get("error_message"):
+        return "error_node"
     return "end_node"
 
 
@@ -82,6 +90,7 @@ def create_report_processing_graph():
     graph.add_node("create_report_object_node", create_report_object_node)
     graph.add_node("calculate_indicators_node", calculate_indicators_node)
     graph.add_node("get_bcra_data_node", get_bcra_data_node)
+    graph.add_node("generate_ai_report_node", generate_ai_report_node)
     graph.add_node("error_node", error_node)
     graph.add_node("end_node", end_node)
     
@@ -123,6 +132,15 @@ def create_report_processing_graph():
     graph.add_conditional_edges(
         "get_bcra_data_node",
         route_after_bcra,
+        {
+            "generate_ai_report_node": "generate_ai_report_node",
+            "error_node": "error_node"
+        }
+    )
+    
+    graph.add_conditional_edges(
+        "generate_ai_report_node",
+        route_after_ai_report,
         {
             "end_node": "end_node",
             "error_node": "error_node"
@@ -177,6 +195,7 @@ async def process_report(
         "docfile": None,
         "indicators": None,
         "bcra_data": None,
+        "ai_report": None,
         "progress": 0.0,
         "error_message": None,
         "_next_node": None

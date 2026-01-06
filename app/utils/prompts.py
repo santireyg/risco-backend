@@ -176,8 +176,8 @@ A continuación se encuentra un documento, tu tarea es extraer la información s
 Debes extraer la siguiente información:
 - company_cuit (str): CUIT de la empresa, sin guiones ni espacios (string de 11 dígitos numéricos siempre, o None).
 - company_name (str): Nombre de la empresa o razón social.
-- company_address (str): Dirección o domicilio legal de la empresa o compañía (sólo si está presente en las imágenes).
 - company_activity (str): Descripción de la Actividad Económica Principal de la empresa (sólo si está presente en las imágenes).
+- company_address (str): Dirección o domicilio legal de la empresa o compañía (sólo si está presente en las imágenes).
 
 Sólo debes responder si la información está presente de forma explicita en el documento.
 
@@ -187,8 +187,8 @@ Responde en un JSON como el siguiente:
 {
   "company_cuit": 0,
   "company_name": "Nombre de la empresa",
-  "company_address": "Dirección o domicilio",
-  "company_activity": "Descripción de la actividad económica principal"
+  "company_activity": "Descripción de la actividad económica principal",
+  "company_address": "Dirección o domicilio"
 }
 
 En caso de no encontrar la información de company_activity o company_address, puedes dejar el campo como None.

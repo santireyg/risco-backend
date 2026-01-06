@@ -37,6 +37,7 @@ class ReportProcessingState(TypedDict):
     # ------------------------------------------------------------------------------------
     indicators: Optional[List[Dict[str, Any]]]  # Indicadores calculados
     bcra_data: Optional[Dict[str, Any]]         # Datos del BCRA
+    ai_report: Optional[Dict[str, Any]]         # Reporte de IA generado
     
     # ------------------------------------------------------------------------------------
     # ESTADO DEL PROCESAMIENTO
