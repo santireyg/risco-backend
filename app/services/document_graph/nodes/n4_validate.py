@@ -9,7 +9,7 @@ from bson import ObjectId
 from app.utils.status_notifier import update_status
 
 # Importes para LangGraph
-from app.services.graph_state import DocumentProcessingState
+from app.services.document_graph.graph_state import DocumentProcessingState
 
 TOLERANCIA_ERROR = 0.0005 # 0.05%
 

@@ -24,7 +24,7 @@ from app.core.config import S3_BUCKET_NAME, S3_ENVIRONMENT
 from pdf2image import pdfinfo_from_path
 
 # Importes para LangGraph
-from app.services.graph_state import DocumentProcessingState
+from app.services.document_graph.graph_state import DocumentProcessingState
 from app.models.docs import Page
 
 

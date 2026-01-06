@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 from io import BytesIO
 
 # Importes para LangGraph
-from app.services.graph_state import DocumentProcessingState 
+from app.services.document_graph.graph_state import DocumentProcessingState 
 
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI

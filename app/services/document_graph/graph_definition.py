@@ -10,13 +10,13 @@ import logging
 from typing import Literal
 from langgraph.graph import StateGraph, END
 
-from app.services.graph_state import DocumentProcessingState
-from app.services.graph_router import route_operation, router_node, get_operation_description
-from app.services.graph_nodes.n0_start_end import start_node, end_node, error_node
-from app.services.graph_nodes.n1_upload_convert import upload_convert_node
-from app.services.graph_nodes.n2_recognize import recognize_node
-from app.services.graph_nodes.n3_extract import extract_node
-from app.services.graph_nodes.n4_validate import validate_node
+from app.services.document_graph.graph_state import DocumentProcessingState
+from app.services.document_graph.graph_router import route_operation, router_node, get_operation_description
+from app.services.document_graph.nodes.n0_start_end import start_node, end_node, error_node
+from app.services.document_graph.nodes.n1_upload_convert import upload_convert_node
+from app.services.document_graph.nodes.n2_recognize import recognize_node
+from app.services.document_graph.nodes.n3_extract import extract_node
+from app.services.document_graph.nodes.n4_validate import validate_node
 from app.models.users import UserPublic
 
 logger = logging.getLogger(__name__)

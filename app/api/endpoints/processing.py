@@ -187,3 +187,65 @@ async def validate_task(
         "message": "La validación de datos está en proceso.",
         "docfile_id": docfile_id,
     }
+
+
+# -------------------------------------------------------------------------------------
+# GENERATE REPORT: Genera un reporte financiero a partir de un balance analizado
+# -------------------------------------------------------------------------------------
+@router.post("/generate_report/{docfile_id}", response_model=dict,
+             summary="Generar reporte financiero",
+             description="Genera un reporte financiero con indicadores y datos del BCRA a partir de un documento de balance analizado."
+             )
+@limiter.limit("5/minute")
+async def generate_report_task(
+    docfile_id: str,
+    current_user: User = Depends(get_current_user),
+    request: Request = None
+):
+    """
+    Genera un reporte financiero a partir de un documento de balance analizado.
+    
+    El reporte incluye:
+    - Información de la empresa
+    - 8 indicadores financieros (KPIs)
+    - Datos del BCRA (deudas, historial, cheques rechazados)
+    """
+    from app.services.task_queue import enqueue_report_processing
+    
+    try:
+        # Verificar que el documento existe y pertenece al tenant del usuario
+        document = await docs_collection.find_one({
+            "_id": ObjectId(docfile_id),
+            "tenant_id": current_user.tenant_id
+        })
+        
+        if not document:
+            raise HTTPException(status_code=404, detail="Documento no encontrado")
+        
+        # Verificar que el documento está analizado
+        if document.get("status") != "Analizado":
+            raise HTTPException(
+                status_code=400, 
+                detail=f"El documento debe estar en estado 'Analizado' para generar un reporte. Estado actual: {document.get('status')}"
+            )
+        
+        # Convertir User a UserPublic
+        requester = UserPublic(**current_user.model_dump())
+        
+        # Encolar tarea de generación de reporte
+        await enqueue_report_processing(
+            docfile_id=docfile_id,
+            requester=requester
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error al generar reporte: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error al generar reporte: {str(e)}")
+    
+    return {
+        "message": "El reporte está siendo generado en segundo plano.",
+        "docfile_id": docfile_id,
+    }
+

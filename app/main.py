@@ -12,7 +12,7 @@ from app.core.limiter import limiter
 from app.api.endpoints import auth, processing, crud, websocket, user_registration, user_management, export
 
 # Importar el inicializador del worker de la cola de tareas
-from app.services.task_queue import start_graph_worker_loop
+from app.services.task_queue import start_graph_worker_loop, start_report_worker_loop
 
 # Importar el tracker avanzado de memoria
 from app.utils.advanced_memory_tracker import advanced_memory_tracker, cleanup_advanced_memory_tracker
@@ -89,6 +89,7 @@ async def startup_event():
     
     # Inicializar worker de procesamiento LangGraph
     start_graph_worker_loop()     # Worker LangGraph unificado
+    start_report_worker_loop()    # Worker de generación de reportes
     
     logger.info("✅ Aplicación iniciada correctamente")
 

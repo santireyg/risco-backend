@@ -7,7 +7,7 @@ Determina la secuencia de ejecución basada en la operación solicitada y
 valida que el estado tenga los datos requeridos para cada operación.
 """
 
-from app.services.graph_state import DocumentProcessingState
+from app.services.document_graph.graph_state import DocumentProcessingState
 from app.core.database import docs_collection
 from bson import ObjectId
 import logging

@@ -5,12 +5,12 @@ from app.core.database import docs_collection
 from app.utils.status_notifier import update_status
 
 # Importes para LangGraph
-from app.services.graph_state import DocumentProcessingState
+from app.services.document_graph.graph_state import DocumentProcessingState
 
 # Imports de LangChain legacy eliminados
-from app.services.graph_nodes.n3_extract_balance import extract_balance
-from app.services.graph_nodes.n3_extract_income import extract_income
-from app.services.graph_nodes.n3_extract_company_info import extract_company_info
+from app.services.document_graph.nodes.n3_extract_balance import extract_balance
+from app.services.document_graph.nodes.n3_extract_income import extract_income
+from app.services.document_graph.nodes.n3_extract_company_info import extract_company_info
 # TimingCallbackHandler legacy eliminado
 from app.utils.memory_cleanup import try_malloc_trim  ##🧹 MALLOC_TRIM para extract
 

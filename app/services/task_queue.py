@@ -9,14 +9,18 @@ import tracemalloc
 from typing import Literal, Optional
 
 # Importes para LangGraph
-from app.services.graph_definition import process_document
+from app.services.document_graph.graph_definition import process_document
+from app.services.report_graph.graph_definition import process_report
 
 # ------------------------------------------------------------------------------------
 # SISTEMA DE COLAS UNIFICADO PARA LANGGRAPH
 # ------------------------------------------------------------------------------------
 
-# Cola unificada para todas las operaciones del graph
+# Cola unificada para todas las operaciones del graph de documentos
 graph_queue = asyncio.Queue()
+
+# Cola para operaciones de generación de reportes
+report_queue = asyncio.Queue()
 
 @advanced_memory_monitor("enqueue_graph_processing")
 async def enqueue_graph_processing(
@@ -191,3 +195,93 @@ def start_graph_worker_loop():
     """Inicia el worker loop para el procesamiento LangGraph."""
     loop = asyncio.get_event_loop()
     loop.create_task(graph_worker())
+
+
+# ------------------------------------------------------------------------------------
+# SISTEMA DE COLAS PARA REPORTES
+# ------------------------------------------------------------------------------------
+
+@advanced_memory_monitor("enqueue_report_processing")
+async def enqueue_report_processing(
+    docfile_id: str,
+    requester: UserPublic
+):
+    """
+    Encola una tarea de generación de reporte.
+    
+    Args:
+        docfile_id: ID del documento (balance) a partir del cual generar el reporte
+        requester: Usuario que solicita el reporte
+    """
+    try:
+        # Crear tupla con los datos de la tarea
+        task_data = (docfile_id, requester)
+        
+        await report_queue.put(task_data)
+        
+        logging.info(f"[REPORT_QUEUE] Tarea encolada - Documento: {docfile_id}")
+        
+        # Log estado de la cola
+        queue_size = report_queue.qsize()
+        logging.info(f"[REPORT_QUEUE] Tamaño actual de cola: {queue_size}")
+        
+    except Exception as e:
+        logging.error(f"[REPORT_QUEUE] Error encolando tarea para documento {docfile_id}: {e}")
+        raise
+
+
+@advanced_memory_monitor("report_worker")
+async def report_worker():
+    """
+    Worker asíncrono para procesar tareas de generación de reportes.
+    """
+    logging.info("[REPORT_QUEUE] Worker de reportes iniciado...")
+    
+    while True:
+        docfile_id = None
+        requester = None
+        
+        try:
+            # Obtener tarea de la cola
+            docfile_id, requester = await report_queue.get()
+            
+            logging.info(f"[REPORT_QUEUE] Iniciando generación de reporte - Documento: {docfile_id}")
+            
+            # Procesar reporte usando el graph de reportes
+            final_state = await process_report(
+                docfile_id=docfile_id,
+                requester=requester
+            )
+            
+            # Verificar si hubo errores
+            if final_state.get("error_message"):
+                logging.error(f"[REPORT_QUEUE] Error en generación de reporte {docfile_id}: {final_state['error_message']}")
+            else:
+                logging.info(f"[REPORT_QUEUE] Reporte generado exitosamente - Documento: {docfile_id} - Report ID: {final_state.get('report_id')}")
+            
+        except Exception as e:
+            logging.error(f"[REPORT_QUEUE] Error generando reporte para {docfile_id}: {e}")
+            
+        finally:
+            # Limpieza
+            try:
+                if requester:
+                    del requester
+                if docfile_id:
+                    docfile_id_temp = docfile_id
+                    del docfile_id
+                
+                gc.collect()
+                
+            except Exception as cleanup_error:
+                logging.error(f"[REPORT_QUEUE] Error en limpieza de memoria: {cleanup_error}")
+            
+            # Marcar tarea como completada
+            report_queue.task_done()
+
+
+def start_report_worker_loop():
+    """Inicia el worker loop para generación de reportes."""
+    loop = asyncio.get_event_loop()
+    loop.create_task(report_worker())
+

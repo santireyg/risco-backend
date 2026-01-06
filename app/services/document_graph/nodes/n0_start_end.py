@@ -9,8 +9,8 @@ Nodos de control del graph de procesamiento de documentos:
 """
 
 import logging
-from app.services.graph_state import DocumentProcessingState
-from app.services.graph_router import get_operation_description
+from app.services.document_graph.graph_state import DocumentProcessingState
+from app.services.document_graph.graph_router import get_operation_description
 
 logger = logging.getLogger(__name__)
 

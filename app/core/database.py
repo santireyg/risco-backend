@@ -11,3 +11,4 @@ db = client[MONGO_DB]
 # Colecciones de la base de datos
 users_collection = db["users"]
 docs_collection = db["documents"]
+reports_collection = db["reports"]

@@ -15,7 +15,7 @@ from app.models.users import User
 from app.core.auth import get_current_user
 from app.core.s3_client import get_presigned_url_from_image_path, s3_client, S3_BUCKET_NAME
 from app.models.docs import DocFile
-from app.services.graph_nodes.n4_validate import validate
+from app.services.document_graph.nodes.n4_validate import validate
 from app.services.download_service import get_document_download_url, get_document_filename
 from app.main import limiter
 from app.utils.accent_regex import build_accent_insensitive_regex

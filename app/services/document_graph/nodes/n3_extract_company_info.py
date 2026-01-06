@@ -6,7 +6,7 @@ from app.core.database import docs_collection
 from app.models.docs import DocFile
 
 # Importes para LangGraph
-from app.services.graph_state import DocumentProcessingState
+from app.services.document_graph.graph_state import DocumentProcessingState
 
 # Imports de LangChain legacy eliminados
 from langchain_core.prompts import ChatPromptTemplate
