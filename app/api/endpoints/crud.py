@@ -108,7 +108,8 @@ async def list_documents(
         "company_info.company_name": 1,
         "company_info.company_cuit": 1,
         "processing_time": 1,
-        "page_count": 1
+        "page_count": 1,
+        "report_status": 1
     }
 
     cursor = (
@@ -177,6 +178,8 @@ async def get_document(
                     "balance_data": 1,
                     "income_statement_data": 1,
                     "company_info": 1,
+                    "report_id": 1,
+                    "report_status": 1,
                     "tenant_id": 1,
                     # Filtrar solo páginas relevantes
                     "pages": {

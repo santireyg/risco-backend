@@ -8,10 +8,11 @@ class ProcessingTime(BaseModel):
     recognize: Optional[float] = Field(default=None, description="Tiempo en segundos para reconocimiento")
     extract: Optional[float] = Field(default=None, description="Tiempo en segundos para extracción")
     validation: Optional[float] = Field(default=None, description="Tiempo en segundos para validación")
+    reporting: Optional[float] = Field(default=None, description="Tiempo en segundos para generación de reporte (no incluido en total)")
     total: Optional[float] = Field(default=None, description="Tiempo total en segundos")
 
     def calculate_total(self) -> Optional[float]:
-        """Calcula el tiempo total sumando los tiempos de las etapas que no son None"""
+        """Calcula el tiempo total sumando los tiempos de las etapas que no son None (excluye reporting)"""
         times = [
             self.upload_convert,
             self.recognize,

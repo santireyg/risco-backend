@@ -155,7 +155,7 @@ class Report(BaseModel):
     """Modelo principal del reporte financiero."""
     tenant_id: str
     docfile_id: str
-    status: Literal["Creando reporte", "Reporte creado", "Error"] = "Creando reporte"
+    status: Literal["Generando reporte", "Finalizado", "Error"] = "Generando reporte"
     company_name: str
     company_cuit: Optional[str] = None
     company_info: Optional[CompanyInfoReport] = None
@@ -165,6 +165,7 @@ class Report(BaseModel):
     indicators: Optional[List[IndicatorResult]] = None
     bcra_data: Optional[BCRAData] = None
     ai_report: Optional[AIReport] = None
+    report_processing_time: Optional[float] = Field(default=None, description="Tiempo total de generación del reporte en segundos")
     error_message: Optional[str] = None
 
     class Config:

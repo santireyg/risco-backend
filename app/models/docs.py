@@ -43,6 +43,8 @@ class DocFile(BaseModel):
     processing_time: Optional["ProcessingTime"] = Field(default=None, description="Tiempos de procesamiento por etapa")
     export_data: Optional["ExportData"] = None
     tenant_id: str = "default"  # Tenant propietario del documento
+    report_id: Optional[str] = Field(default=None, description="ID del último reporte generado a partir de este documento")
+    report_status: Optional[str] = Field(default=None, description="Status del último reporte generado")
 
     class Config:
         json_encoders = {

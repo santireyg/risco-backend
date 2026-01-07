@@ -19,7 +19,7 @@ Enfócate en razonar el análisis, cruzando los distintos datos de manera lógic
 - Luego incluye una sección titulada **Key Insights**, con ítems concretos: separa entre "Puntos fuertes", "Alertas" y "Alarmas" (cada uno en un renglón o dos, máximo). Haz listas breves con insights accionables, útiles para el analista decisor.
 - Mantén un tono profesional, directo y enfocado en la utilidad para la toma de decisión. Evita explicaciones innecesarias sobre metodología.
 - Si algún dato clave del EECC falta, señala cómo podría influir en la evaluación de riesgo.
-- Si algo de los que te brindo está en blanco o N/A, asume que no hay o es cero (ej. si cheques rechazados está vacío, es porque no los hay).
+- Si cheques rechazados está vacío, es porque no los hay.
 
 # Formato de salida
 - El output debe ser un documento en formato Markdown, dentro de un JSON.

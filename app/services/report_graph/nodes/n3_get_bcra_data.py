@@ -77,18 +77,13 @@ async def get_bcra_data_node(state: ReportProcessingState) -> ReportProcessingSt
                 "error": "CUIT no disponible en el documento"
             }
         
-        # Actualizar el reporte en la base de datos con status final
+        # Actualizar el reporte en la base de datos
         await reports_collection.update_one(
             {"_id": ObjectId(report_id)},
-            {
-                "$set": {
-                    "bcra_data": bcra_data,
-                    "status": "Reporte creado"
-                }
-            }
+            {"$set": {"bcra_data": bcra_data}}
         )
         
-        logger.info(f"[REPORT_GRAPH] Reporte {report_id} completado con status 'Reporte creado'")
+        logger.info(f"[REPORT_GRAPH] Reporte {report_id} actualizado con bcra_data")
         
         # Actualizar estado
         updated_state = state.copy()

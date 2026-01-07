@@ -18,6 +18,8 @@ async def update_status(
     balance_date=None,
     validation=None,
     ai_report=None,
+    report_id=None,
+    report_status=None,
     update_db=True,  # Si es False, se envía el webhook sin actualizar la BD.
     send_progress_ws=False  # Si es True, se envía el progress vía WebSocket.
 ):
@@ -37,6 +39,8 @@ async def update_status(
     :param balance_date: Fecha del balance.
     :param validation: Información de validación.
     :param ai_report: Reporte generado por IA.
+    :param report_id: ID del último reporte generado.
+    :param report_status: Status del último reporte generado.
     :param update_db: Booleano que indica si se actualiza la BD (True por defecto).
     :param send_progress_ws: Booleano que indica si se envía el progress en el mensaje WebSocket (False por defecto).
     """
@@ -55,6 +59,10 @@ async def update_status(
         update_data["validation"] = validation
     if ai_report is not None:
         update_data["ai_report"] = ai_report
+    if report_id is not None:
+        update_data["report_id"] = report_id
+    if report_status is not None:
+        update_data["report_status"] = report_status
 
     # Actualiza la BD solo si update_db es True
     if update_db:
@@ -84,6 +92,10 @@ async def update_status(
             message_payload["processing_time"] = processing_time
         if error_message:
             message_payload["error_message"] = error_message
+        if report_id is not None:
+            message_payload["report_id"] = report_id
+        if report_status is not None:
+            message_payload["report_status"] = report_status
 
         message = json.dumps(message_payload)
         await manager.broadcast(user_id, message)

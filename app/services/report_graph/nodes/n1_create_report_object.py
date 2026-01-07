@@ -106,7 +106,7 @@ async def create_report_object_node(state: ReportProcessingState) -> ReportProce
         report = Report(
             tenant_id=tenant_id,
             docfile_id=docfile_id,
-            status="Creando reporte",
+            status="Generando reporte",
             company_name=company_name,
             company_cuit=company_cuit,
             company_info=company_info_report,
@@ -123,6 +123,25 @@ async def create_report_object_node(state: ReportProcessingState) -> ReportProce
         report_id = str(result.inserted_id)
         
         logger.info(f"[REPORT_GRAPH] Reporte creado con ID: {report_id}")
+        
+        # Actualizar document con report_id y report_status usando update_status
+        from app.utils.status_notifier import update_status
+        user_id = str(requester.id)
+        
+        # Obtener el status actual del documento para no modificarlo
+        current_status = docfile.get("status", "Reporte IA")
+        
+        await update_status(
+            collection=docs_collection,
+            docfile_id=docfile_id,
+            new_status=current_status,  # Mantener el status actual
+            user_id=user_id,
+            report_id=report_id,
+            report_status="Generando reporte",
+            update_db=True,
+            send_progress_ws=False
+        )
+        logger.info(f"[REPORT_GRAPH] Documento {docfile_id} actualizado con report_id: {report_id} y report_status: 'Generando reporte' (notificado vía websocket)")
         
         # Actualizar estado con datos obtenidos
         updated_state = state.copy()

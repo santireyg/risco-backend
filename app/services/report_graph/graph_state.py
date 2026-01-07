@@ -44,6 +44,7 @@ class ReportProcessingState(TypedDict):
     # ------------------------------------------------------------------------------------
     progress: Optional[float]          # Progreso actual (0.0 - 1.0)
     error_message: Optional[str]       # Mensaje de error si algo falla
+    start_time: Optional[float]        # Timestamp de inicio del procesamiento (para medir duración)
     
     # ------------------------------------------------------------------------------------
     # CAMPOS INTERNOS DEL GRAPH
