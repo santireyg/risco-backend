@@ -461,7 +461,7 @@ async def delete_document(
 
 
 # -------------------------------------------------------------------------------------
-# /report/{report_id}: ENDPOINT PARA OBTENER UN REPORTE POR SU ID
+# /report/{report_id}: ENDPOINT PARA OBTENER UN REPORTE POR SU ID O DOCFILE_ID
 # -------------------------------------------------------------------------------------
 @router.get("/report/{report_id}")
 @limiter.limit("30/minute")
@@ -471,7 +471,10 @@ async def get_report(
     request: Request = None
 ):
     """
-    Obtiene un reporte financiero por su ID.
+    Obtiene un reporte financiero por su ID o por docfile_id.
+    
+    Intenta primero buscar por report_id. Si no encuentra, busca por docfile_id
+    y retorna el reporte más reciente generado para ese documento.
     
     Valida que:
     - El ID sea válido
@@ -482,11 +485,23 @@ async def get_report(
         object_id = ObjectId(report_id)
         tenant_id = current_user.tenant_id
         
-        # Buscar el reporte verificando que pertenece al tenant del usuario
+        # Intentar buscar por report_id primero
         report = await reports_collection.find_one({
             "_id": object_id,
             "tenant_id": tenant_id
         })
+        
+        # Si no se encontró, intentar buscar por docfile_id
+        if not report:
+            # Buscar el reporte más reciente para el docfile_id
+            cursor = reports_collection.find({
+                "docfile_id": report_id,
+                "tenant_id": tenant_id
+            }).sort("created_at", -1).limit(1)
+            
+            reports_list = await cursor.to_list(length=1)
+            if reports_list:
+                report = reports_list[0]
         
         if not report:
             raise HTTPException(status_code=404, detail="Reporte no encontrado")
@@ -500,5 +515,5 @@ async def get_report(
         raise
     except Exception as e:
         if "Invalid ObjectId" in str(e):
-            raise HTTPException(status_code=400, detail="ID de reporte inválido")
+            raise HTTPException(status_code=400, detail="ID de reporte o documento inválido")
         raise HTTPException(status_code=500, detail=f"Error al obtener el reporte: {str(e)}")
