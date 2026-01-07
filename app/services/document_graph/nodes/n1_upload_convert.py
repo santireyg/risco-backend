@@ -16,6 +16,8 @@ from app.utils.status_notifier import update_status
 import tempfile
 from io import BytesIO
 import math
+from PIL import Image
+from PIL.Image import LANCZOS
 from app.utils.memory_cleanup import try_malloc_trim  ##🧹 MALLOC_TRIM para upload_convert
 
 # Importamos el cliente de S3 y configuración
@@ -179,7 +181,7 @@ async def convert_pdf_to_images(state: DocumentProcessingState) -> DocumentProce
                      temp_pdf_path,
                      first_page=start_page_batch,
                      last_page=end_page_batch,
-                     #dpi=300 # Considera ajustar DPI si la calidad o tamaño de archivo son un problema
+                     dpi=150 # Considera ajustar DPI si la calidad o tamaño de archivo son un problema
                  )
             except Exception as convert_e:
                  logging.error(f"Error al convertir lote de páginas {start_page_batch}-{end_page_batch} para docfile {docfile_id}: {convert_e}", exc_info=True)
@@ -190,6 +192,12 @@ async def convert_pdf_to_images(state: DocumentProcessingState) -> DocumentProce
             # Procesar cada imagen dentro del lote
             for j, image in enumerate(batch_images):
                 current_page_number = start_page_batch + j # Número de la página actual (1-based)
+
+                # 🖼️ RESIZE: Limitar dimensiones máximas para controlar memoria
+                MAX_DIMENSION = 2000
+                if image.width > MAX_DIMENSION or image.height > MAX_DIMENSION:
+                    image.thumbnail((MAX_DIMENSION, MAX_DIMENSION), LANCZOS)
+                    logging.info(f"Página {current_page_number} redimensionada a {image.width}x{image.height} para docfile {docfile_id}")
 
                 # Obtener configuración del tenant para rutas S3
                 tenant_id = state.get('tenant_id', 'default')
