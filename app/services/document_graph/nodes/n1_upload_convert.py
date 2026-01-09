@@ -197,7 +197,7 @@ async def convert_pdf_to_images(state: DocumentProcessingState) -> DocumentProce
                 MAX_DIMENSION = 2000
                 if image.width > MAX_DIMENSION or image.height > MAX_DIMENSION:
                     image.thumbnail((MAX_DIMENSION, MAX_DIMENSION), LANCZOS)
-                    logging.info(f"Página {current_page_number} redimensionada a {image.width}x{image.height} para docfile {docfile_id}")
+                    # logging.info(f"Página {current_page_number} redimensionada a {image.width}x{image.height} para docfile {docfile_id}")
 
                 # Obtener configuración del tenant para rutas S3
                 tenant_id = state.get('tenant_id', 'default')
