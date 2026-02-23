@@ -11,7 +11,7 @@ from bson import ObjectId
 from app.services.report_graph.graph_state import ReportProcessingState
 from app.core.database import reports_collection
 from app.models.report import AIReport
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from app.utils.toon_formatters import (
     format_indicators_to_toon,
     format_balance_data_to_toon,
@@ -20,9 +20,12 @@ from app.utils.toon_formatters import (
     format_company_info,
     format_date
 )
-from app.utils.prompts_ai_report import PROMPT_INSTRUCCIONES
+from app.utils.prompts_ai_report import PROMPT_INSTRUCCIONES, PROMPT_REFERENCIAS_BCRA
 
 logger = logging.getLogger(__name__)
+
+# Modelo a utilizar para la generación del reporte
+MODEL_NAME = "gemini-3.1-pro-preview"
 
 
 # ------------------------------------------------------------------------------------
@@ -36,7 +39,7 @@ async def generate_ai_report_node(state: ReportProcessingState) -> ReportProcess
     1. Obtiene datos del reporte actual
     2. Formatea datos en tablas TOON
     3. Construye prompt con indicaciones y datos
-    4. Llama al LLM (gpt-5.2) con structured output
+    4. Llama al LLM con structured output
     5. Actualiza el reporte con ai_report
     """
     report_id = state.get("report_id")
@@ -111,15 +114,18 @@ async def generate_ai_report_node(state: ReportProcessingState) -> ReportProcess
 
         {bcra_toon}
 
+        ### Referencias de campos del BCRA:
+
+        {PROMPT_REFERENCIAS_BCRA}
+
         ---
         """
         
-        logger.info(f"[REPORT_GRAPH] Invocando LLM gpt-5.2 para reporte {report_id}")
-        
+        logger.info(f"[REPORT_GRAPH] Invocando LLM {MODEL_NAME} para reporte {report_id}")
+
         # Crear modelo LLM con structured output
-        # Usar el método por defecto (function calling) que es más robusto para structured output
-        model = ChatOpenAI(
-            model="gpt-5.2",
+        model = ChatGoogleGenerativeAI(
+            model=MODEL_NAME,
             temperature=0,
             max_retries=2
         ).with_structured_output(AIReport)

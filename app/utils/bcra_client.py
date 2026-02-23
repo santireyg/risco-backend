@@ -189,10 +189,16 @@ async def get_all_bcra_data(cuit: str) -> Dict[str, Any]:
             results = deudas_response["results"]
             result["denominacion"] = results.get("denominacion")
             if results.get("periodos"):
-                result["deudas_ultimo_periodo"] = results["periodos"][0] if results["periodos"] else None
+                periodo = results["periodos"][0] if results["periodos"] else None
+                if periodo:
+                    # Los montos de la API vienen en miles de pesos, convertir a pesos
+                    for entidad in periodo.get("entidades", []):
+                        if entidad.get("monto") is not None:
+                            entidad["monto"] = entidad["monto"] * 1000
+                result["deudas_ultimo_periodo"] = periodo
     except BCRAClientError as e:
         logger.warning(f"[BCRA] Error obteniendo deudas: {e.message}")
-    
+
     # Obtener historial de deudas
     try:
         historicas_response = await get_deudas_historicas(cuit_clean)
@@ -200,7 +206,13 @@ async def get_all_bcra_data(cuit: str) -> Dict[str, Any]:
             results = historicas_response["results"]
             if not result["denominacion"]:
                 result["denominacion"] = results.get("denominacion")
-            result["deudas_historia"] = results.get("periodos", [])
+            periodos = results.get("periodos", [])
+            # Los montos de la API vienen en miles de pesos, convertir a pesos
+            for periodo in periodos:
+                for entidad in periodo.get("entidades", []):
+                    if entidad.get("monto") is not None:
+                        entidad["monto"] = entidad["monto"] * 1000
+            result["deudas_historia"] = periodos
     except BCRAClientError as e:
         logger.warning(f"[BCRA] Error obteniendo historial de deudas: {e.message}")
     

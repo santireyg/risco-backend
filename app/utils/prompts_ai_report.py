@@ -26,10 +26,46 @@ Enfócate en razonar el análisis, cruzando los distintos datos de manera lógic
 - El análisis debe ser en español.
 - Primer bloque: análisis razonado (no mas de 600 palabras). Estilo: "Analizo el...".
 - Segundo bloque: resumen ejecutivo (no más de 400 palabras).
-- Tercer bloque: Key Insights, dividido en Puntos Fuertes, Alertas, Alarmas (bullets, renglón breve).
-- No utilices más de dos niveles de jerarquía de títulos.
+- Tercer bloque: Key Insights, dividido en Puntos Fuertes, Alertas, Alarmas (bullets, renglón breve). Máximo 14 items.
+- No utilices más de dos niveles de jerarquía de títulos/encabezados.
 - Inicia el reporte directamente, omite títulos del estilo "Reporte de análisis de riesgo" o "Empresa Construir SA" o semejantes.
+- Usa en los tres bloques saltos de línea, bullets, negritas, si necesitas. Si usas encabezados que sean pocos. Siempre en markdown.
 
 # Recordatorio
 El objetivo es guiar al usuario en la toma de decisión respecto al riesgo, a partir de un análisis razonado y estructurado de los datos brindados, con conclusiones claras y útiles, y una sección de Key Insights concreta y accionable.
+"""
+
+
+PROMPT_REFERENCIAS_BCRA="""
+A continuación, se detallan los campos retornados por el BCRA de la consulta de *CHEQUES RECHAZADOS*:
+
+| Propiedades | Descripción |
+|---|---|
+| **Identificación** | CUIT/CUIL/CDI ingresado |
+| **Denominación** | Nombre o razón social de la persona humana o jurídica que figura en el padrón de la Administración Federal de Ingresos Públicos (AFIP) o bien la que fuera registrada por la entidad informante. |
+| **Causal** | Motivo del rechazo (Sin fondos – Defectos formales). |
+| **Entidad** | Corresponde un número de agrupamiento por banco. |
+| **NroCheque** | Número de cheque rechazado. |
+| **FechaRechazo** | Fecha que se realizó el rechazo. |
+| **Monto** | Monto del cheque rechazado. |
+| **FechaPago** | Fecha que se realizó el levantamiento del cheque. |
+| **FechaPagoMulta** | Fecha que se realizó el pago de la multa. (*EstadoMulta* = null) |
+| **EstadoMulta** | Para los casos que no posea fecha de pago de multa (“fechaPagoMulta” = null), se informará el estado de esta (IMPAGA, SUSPENDIDO, SUSPENDIDA). |
+| **CtaPersonal** | Si la consulta se realiza para un CUIT/CUIL/CDI correspondiente a una persona humana se indicará siempre “CtaPersonal” = true. En el caso que la consulta se efectúe para una persona jurídica se indicará siempre “CtaPersonal” = false. |
+| **DenomJuridica** | En el caso que la consulta se realice para un CUIT/CUIL/CDI de persona humana y se trate de un cheque vinculado con una persona jurídica, se informará la denominación de la empresa. Si la consulta se realiza para una persona jurídica el campo siempre estará vacío (“null”). |
+| **EnRevision** | Información sometida a revisión (Ley 25.326, art. 16, inc 6) |
+| **Procesojud** | Información sometida a proceso judicial (Ley 25.326, art. 38, inc. 3) |
+
+A continuación, se detallan los campos retornados por el BCRA de la consulta de DEUDAS:
+
+| Propiedades | Descripción |
+|---|---|
+| **Identificación** | CUIT/CUIL/CDI ingresado |
+| **Denominación** | Nombre o razón social de la persona humana o jurídica que figura en el padrón de la Administración Federal de Ingresos Públicos (AFIP) o bien la que fuera registrada por la entidad informante. |
+| **Período** | En formato AAAAMM, indica el último período informado por la entidad. |
+| **Entidad** | Denominación de la entidad informante. |
+| **Situación** | Indica la clasificación del deudor informada por la entidad. Para más información, acceder al Texto ordenado de las normas sobre Clasificación de deudores.  \n\n- **Situación 1:**  \n  - En situación normal \| Cartera comercial, ver sección 6, punto 6.5.1.  \n  - Situación normal \| Cartera para consumo o vivienda, ver sección 7, punto 7.2.1.  \n\n- **Situación 2:**  \n  - Con seguimiento especial \| Con seguimiento especial \| Cartera comercial, ver sección 6, punto 6.5.2.  \n  - Riesgo bajo \| Cartera para consumo o vivienda ver sección 7, punto 7.2.2.  \n\n- **Situación 3:**  \n  - Con problemas \| Cartera comercial, ver sección 6, punto 6.5.3.  \n  - Riesgo medio \| Cartera para consumo o vivienda ver sección 7, punto 7.2.3.  \n\n- **Situación 4:**  \n  - Con alto riesgo de insolvencia \| Cartera comercial, ver sección 6, punto 6.5.4.  \n  - Riesgo alto \| Cartera para consumo o vivienda, ver sección 7, punto 7.2.4.  \n\n- **Situación 5:**  \n  - Irrecuperable \| Cartera comercial, ver sección 6, punto 6.5.5.  \n  - Irrecuperable \| Cartera para consumo o vivienda, ver sección 7, punto 7.2.5. |
+| **Monto** | Información en miles de pesos. |
+| **EnRevision** | Información sometida a revisión (Ley 25.326, art. 16, inc 6) |
+| **Procesojud** | Información sometida a proceso judicial (Ley 25.326, art. 38, inc. 3) |
 """
