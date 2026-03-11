@@ -73,8 +73,8 @@ async def extract_balance_llm(state: DocumentProcessingState) -> DocumentProcess
     model_text = "gemini-3-flash-preview"
     model = ChatGoogleGenerativeAI(
         model=model_text,
-        max_tokens=None,
-        max_retries=2,
+        max_tokens=18000,
+        max_retries=2, 
         temperature=0
     ).with_structured_output(BalanceDataForLLM, method="json_mode")
     

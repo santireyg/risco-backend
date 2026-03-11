@@ -74,7 +74,7 @@ async def extract_income_llm(state: DocumentProcessingState) -> DocumentProcessi
     model_text = "gemini-3-flash-preview"
     model = ChatGoogleGenerativeAI(
         model=model_text,
-        max_tokens=None,
+        max_tokens=18000,
         max_retries=2,
         temperature=0
     ).with_structured_output(IncomeStatementDataForLLM, method="json_mode")
